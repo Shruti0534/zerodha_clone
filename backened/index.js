@@ -16,7 +16,13 @@ const MONGO_URL = process.env.MONGO_URL;
 const app = express();
 
 // ✅ CORS & Middleware should come first
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "https://zerodha-clone-yx60.onrender.com", // your frontend domain
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.json());
