@@ -23,14 +23,16 @@ const Signup = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:3002/signup",
+        "https://backened-urzt.onrender.com/signup",
         { username, email, password },
         { withCredentials: true }
       );
 
       if (data.success) {
         alert(data.message);
-        window.location.href = "http://localhost:5173";
+       // After successful signup/login
+window.location.href = "https://dashboard-qo8b.onrender.com/";
+
       } else {
         alert(data.message);
       }
