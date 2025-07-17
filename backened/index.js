@@ -15,14 +15,25 @@ const MONGO_URL = process.env.MONGO_URL;
 
 const app = express();
 
-// ✅ CORS & Middleware should come first
+// ✅ CORS Setup: Allow frontend and dashboard
+const allowedOrigins = [
+  "https://zerodha-clone-yx60.onrender.com",     // Frontend
+  "https://dashboard-qo8b.onrender.com"          // Dashboard
+];
 
 app.use(
   cors({
-    origin: "https://zerodha-clone-yx60.onrender.com", // your frontend domain
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
+
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.json());
@@ -31,27 +42,23 @@ app.use(express.json());
 app.use("/", authRoute);
 
 app.get('/allHoldings', async (req, res) => {
-  let allHoldings = await HoldingsModel.find({});
-  res.json(allHoldings);
+  const holdings = await HoldingsModel.find({});
+  res.json(holdings);
 });
 
 app.get('/allPositions', async (req, res) => {
-  let allPositions = await PositionsModel.find({});
-  res.json(allPositions);
+  const positions = await PositionsModel.find({});
+  res.json(positions);
 });
 
 app.post("/newOrder", async (req, res) => {
-  let newOrder = new OrdersModel({
-    name: req.body.name,
-    qty: req.body.qty,
-    price: req.body.price,
-    mode: req.body.mode,
-  });
+  const { name, qty, price, mode } = req.body;
+  const newOrder = new OrdersModel({ name, qty, price, mode });
   await newOrder.save();
   res.send("Order saved!");
 });
 
-// ✅ Connect to MongoDB and then start server
+// ✅ MongoDB Connection
 mongoose.connect(MONGO_URL)
   .then(() => {
     console.log("✅ Connected to MongoDB");
@@ -62,4 +69,3 @@ mongoose.connect(MONGO_URL)
   .catch(err => {
     console.error("❌ MongoDB connection error:", err);
   });
-
